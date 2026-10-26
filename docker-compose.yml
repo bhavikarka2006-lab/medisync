@@ -1,0 +1,17 @@
+# Local dev: API + PostgreSQL (mirrors Azure Database for PostgreSQL). Files stored on disk, events handled inline.
+services:
+  db:
+    image: postgres:16-alpine
+    environment: { POSTGRES_USER: medisync, POSTGRES_PASSWORD: medisync, POSTGRES_DB: medisync }
+    ports: ["5432:5432"]
+  api:
+    build: ./app
+    environment:
+      LOCAL_STUBS: "true"
+      SEED_DEMO: "true"
+      DB_HOST: db
+      JWT_SECRET: local-dev-secret
+      ADMIN_EMAIL: admin@medisync.local
+      ADMIN_PASSWORD: Admin@12345
+    ports: ["3000:3000"]
+    depends_on: [db]

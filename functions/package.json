@@ -1,0 +1,13 @@
+{
+  "name": "medisync-functions",
+  "version": "2.0.0",
+  "private": true,
+  "main": "src/functions/*.js",
+  "dependencies": {
+    "@azure/communication-email": "^1.0.0",
+    "@azure/functions": "^4.5.0",
+    "@azure/storage-blob": "^12.24.0",
+    "pdfkit": "^0.15.0",
+    "pg": "^8.12.0"
+  }
+}

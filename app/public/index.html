@@ -1,0 +1,362 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MediSync · Hospital Management</title>
+<style>
+:root{--bg:#f2f6fb;--card:#fff;--text:#0f2133;--muted:#64748b;--primary:#0e7fbf;--primary-2:#13a89e;--border:#e3e9f1;--soft:#eef5fb;--ok:#15803d;--okbg:#dcfce7;--warn:#b45309;--warnbg:#fef3c7;--bad:#b91c1c;--badbg:#fee2e2;--info:#1d4ed8;--infobg:#dbeafe;--shadow:0 1px 2px rgba(15,33,51,.06),0 10px 30px rgba(15,33,51,.07)}
+[data-theme=dark]{--bg:#0a111d;--card:#121b2b;--text:#e8eef7;--muted:#94a3b8;--border:#233149;--soft:#172338;--okbg:#0f3a24;--warnbg:#41300c;--badbg:#431616;--infobg:#172a52;--shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.3)}
+*{box-sizing:border-box}body{margin:0;font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text)}
+h1,h2,h3{margin:0}button,input,select,textarea{font:inherit;color:inherit}
+.hide{display:none!important}.muted{color:var(--muted)}.right{margin-left:auto}.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.btn{border:0;border-radius:10px;padding:9px 14px;background:linear-gradient(135deg,var(--primary),var(--primary-2));color:#fff;font-weight:600;cursor:pointer;transition:.15s}
+.btn:hover{filter:brightness(1.08);transform:translateY(-1px)}.btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+.btn.ghost{background:var(--soft);color:var(--text);border:1px solid var(--border)}.btn.danger{background:var(--bad)}.btn.sm{padding:5px 10px;font-size:13px;border-radius:8px}
+input,select,textarea{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:10px;background:var(--card);outline:none}
+input:focus,select:focus,textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(14,127,191,.18)}
+label{display:block;font-size:13px;font-weight:600;margin:10px 0 4px;color:var(--muted)}
+.card{background:var(--card);border-radius:16px;padding:18px;box-shadow:var(--shadow);border:1px solid var(--border);margin-bottom:16px}
+.card h3{font-size:16px;margin-bottom:12px}
+/* auth */
+#auth{min-height:100vh;display:grid;grid-template-columns:1.1fr 1fr}
+.hero{background:linear-gradient(145deg,#0b5f94,#13a89e);color:#fff;padding:48px;display:flex;flex-direction:column;justify-content:center;gap:16px}
+.hero h1{font-size:40px}.hero li{margin:8px 0;opacity:.95}.hero ul{padding-left:18px;margin:0}
+.authbox{display:flex;align-items:center;justify-content:center;padding:28px}.authbox .inner{width:100%;max-width:400px}
+.tabs{display:flex;background:var(--soft);border-radius:12px;padding:4px;margin-bottom:12px}
+.tabs button{flex:1;border:0;background:none;padding:9px;border-radius:9px;font-weight:600;color:var(--muted);cursor:pointer}.tabs button.on{background:var(--card);color:var(--text);box-shadow:var(--shadow)}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}.chip{border:1px solid var(--border);background:var(--soft);padding:5px 10px;border-radius:99px;font-size:12px;cursor:pointer}
+.chip.on{background:var(--primary);color:#fff;border-color:var(--primary)}
+/* shell */
+.app{display:grid;grid-template-columns:240px 1fr;min-height:100vh}
+.side{background:var(--card);border-right:1px solid var(--border);padding:18px 12px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column;gap:4px}
+.brand{font-size:22px;font-weight:800;padding:4px 10px 16px;background:linear-gradient(135deg,var(--primary),var(--primary-2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.nav{display:flex;gap:10px;align-items:center;border:0;background:none;padding:10px 12px;border-radius:10px;cursor:pointer;color:var(--muted);font-weight:600;text-align:left;width:100%}
+.nav:hover{background:var(--soft)}.nav.on{background:linear-gradient(135deg,var(--primary),var(--primary-2));color:#fff}
+main{padding:22px;max-width:1200px;width:100%}
+.top{display:flex;align-items:center;gap:12px;margin-bottom:18px;flex-wrap:wrap}.top h2{font-size:24px}
+.user{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--border);padding:5px 12px 5px 5px;border-radius:99px;cursor:pointer}
+.avatar{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--primary-2));color:#fff;display:grid;place-items:center;font-weight:700;font-size:13px}
+.iconbtn{width:38px;height:38px;border-radius:50%;border:1px solid var(--border);background:var(--card);cursor:pointer;font-size:16px}
+/* kpis, charts */
+.grid{display:grid;gap:14px}.g4{grid-template-columns:repeat(auto-fit,minmax(190px,1fr))}.g2{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.kpi{display:flex;gap:14px;align-items:center;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;box-shadow:var(--shadow)}
+.kpi .ico{width:46px;height:46px;border-radius:12px;display:grid;place-items:center;font-size:22px;background:var(--soft)}
+.kpi b{font-size:26px;display:block;line-height:1}.kpi span{color:var(--muted);font-size:13px}
+.bars{display:flex;align-items:flex-end;gap:10px;height:170px;padding-top:10px}
+.bar{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:4px}
+.bar span{width:100%;max-width:42px;border-radius:8px 8px 3px 3px;background:linear-gradient(180deg,var(--primary-2),var(--primary));min-height:3px;transition:height .5s}
+.bar b{font-size:12px}.bar i{font-size:11px;color:var(--muted);font-style:normal;white-space:nowrap}
+.donutwrap{display:flex;align-items:center;gap:18px}.donut{width:130px;height:130px}
+/* tables & badges */
+.tw{overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:14px}
+th{text-align:left;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.04em;padding:8px 10px;border-bottom:1px solid var(--border)}
+td{padding:11px 10px;border-bottom:1px solid var(--border);vertical-align:middle}tr.click{cursor:pointer}tr.click:hover td{background:var(--soft)}
+.badge{padding:3px 10px;border-radius:99px;font-size:12px;font-weight:700;text-transform:capitalize;white-space:nowrap}
+.badge.pending{background:var(--warnbg);color:var(--warn)}.badge.confirmed{background:var(--infobg);color:var(--info)}
+.badge.completed,.badge.free{background:var(--okbg);color:var(--ok)}.badge.cancelled,.badge.occupied{background:var(--badbg);color:var(--bad)}
+.badge.role{background:var(--soft);color:var(--text)}
+/* booking */
+.docs{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px}
+.doc{text-align:left;border:2px solid var(--border);background:var(--card);border-radius:14px;padding:12px;cursor:pointer;display:flex;gap:10px;align-items:center}
+.doc.on{border-color:var(--primary);background:var(--soft)}.doc small{color:var(--muted)}
+.slots{display:grid;grid-template-columns:repeat(auto-fill,minmax(82px,1fr));gap:8px;margin-top:8px}
+.slot{border:1px solid var(--border);background:var(--card);border-radius:10px;padding:9px 0;cursor:pointer;font-weight:600}
+.slot:hover:not(:disabled){border-color:var(--primary)}.slot.on{background:var(--primary);color:#fff;border-color:var(--primary)}
+.slot:disabled{opacity:.4;text-decoration:line-through;cursor:not-allowed}
+.steps{display:flex;gap:8px;font-size:13px;color:var(--muted);margin-bottom:10px;flex-wrap:wrap}.steps b{color:var(--primary)}
+/* beds */
+.ward{margin-bottom:18px}.ward h4{margin:0 0 8px;display:flex;gap:8px;align-items:center}
+.beds{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px}
+.bed{border-radius:14px;padding:12px;border:1px solid var(--border);background:var(--card);border-left:6px solid var(--ok)}
+.bed.occupied{border-left-color:var(--bad)}.bed b{display:block}.bed small{color:var(--muted);display:block;min-height:18px}.bed .btn{margin-top:8px;width:100%}
+/* modal & toast */
+.overlay{position:fixed;inset:0;background:rgba(5,12,24,.55);display:grid;place-items:center;z-index:50;padding:14px;backdrop-filter:blur(2px)}
+.modal{background:var(--card);border-radius:18px;padding:22px;width:100%;max-width:620px;max-height:90vh;overflow:auto;box-shadow:var(--shadow);border:1px solid var(--border)}
+.modal header{display:flex;align-items:center;margin-bottom:10px}.modal header h3{font-size:19px}
+#toasts{position:fixed;right:16px;bottom:16px;display:flex;flex-direction:column;gap:8px;z-index:99}
+.toast{background:#0f2133;color:#fff;padding:11px 16px;border-radius:12px;box-shadow:var(--shadow);animation:in .25s;max-width:340px}
+.toast.err{background:var(--bad)}.toast.ok{background:var(--ok)}@keyframes in{from{opacity:0;transform:translateY(10px)}}
+.empty{text-align:center;color:var(--muted);padding:26px}.skeleton{color:var(--muted);padding:40px;text-align:center}
+.flow{display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:8px}.flow span{background:var(--soft);padding:3px 8px;border-radius:8px}
+@media(max-width:860px){#auth{grid-template-columns:1fr}.hero{display:none}.app{grid-template-columns:1fr}
+.side{position:sticky;top:0;z-index:20;height:auto;flex-direction:row;overflow-x:auto;padding:8px;border-right:0;border-bottom:1px solid var(--border)}.brand{display:none}.nav{width:auto;white-space:nowrap}main{padding:14px}}
+</style>
+</head>
+<body>
+<div id="auth" class="hide">
+  <section class="hero">
+    <h1>🏥 MediSync</h1>
+    <p style="font-size:18px;margin:0">Secure, cloud-native hospital management for unified patient care, scheduling &amp; billing.</p>
+    <ul><li>Real-time appointment booking with conflict-free slots</li><li>Role-based access for admins, doctors, nurses and patients</li><li>Encrypted records in private cloud storage</li><li>Automatic email confirmations &amp; PDF invoices</li></ul>
+    <small style="opacity:.8">Runs on Microsoft Azure · Container Apps · Functions · PostgreSQL · Blob Storage</small>
+  </section>
+  <section class="authbox"><div class="inner card">
+    <div class="tabs"><button id="tabLogin" class="on" data-act="authTab" data-t="login">Sign in</button><button id="tabReg" data-act="authTab" data-t="reg">Create account</button></div>
+    <form id="loginForm" data-form="login">
+      <label>Email</label><input id="lemail" type="email" autocomplete="username" required>
+      <label>Password</label><input id="lpass" type="password" autocomplete="current-password" required>
+      <button class="btn" style="width:100%;margin-top:14px">Sign in</button>
+      <div id="demo" class="hide"><div class="muted" style="margin-top:14px;font-size:13px">Quick demo logins</div><div class="chips" id="demochips"></div></div>
+    </form>
+    <form id="regForm" data-form="register" class="hide">
+      <label>Full name</label><input id="rname" required>
+      <label>Email</label><input id="remail" type="email" required>
+      <label>Phone (optional)</label><input id="rphone" placeholder="+91…">
+      <label>Password (min 8 characters)</label><input id="rpass" type="password" minlength="8" required>
+      <button class="btn" style="width:100%;margin-top:14px">Create patient account</button>
+    </form>
+  </div></section>
+</div>
+
+<div id="shell" class="app hide">
+  <aside class="side" id="side"></aside>
+  <main>
+    <div class="top"><h2 id="title"></h2><div class="right row">
+      <button class="iconbtn" data-act="theme" title="Toggle dark mode">🌓</button>
+      <div class="user" data-act="profile"><div class="avatar" id="avatar"></div><div><b id="uname" style="display:block;font-size:13px"></b><small class="muted" id="urole"></small></div></div>
+      <button class="btn ghost sm" data-act="logout">Sign out</button></div></div>
+    <div id="main"></div>
+  </main>
+</div>
+<div id="modal"></div><div id="toasts"></div>
+
+<script>
+const $ = (s) => document.querySelector(s);
+const S = { token: localStorage.getItem('ms_token'), user: null, view: 'dashboard', cfg: {}, filter: 'all', book: {}, cache: {} };
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const fmt = (d) => new Date(d).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' });
+const money = (n) => '₹' + Number(n || 0).toLocaleString('en-IN');
+const badge = (s) => `<span class="badge ${esc(s)}">${esc(s)}</span>`;
+const setMain = (h) => ($('#main').innerHTML = h);
+const empty = (t) => `<div class="empty">${t}</div>`;
+
+async function api(path, { method = 'GET', body } = {}) {
+  const r = await fetch('/api' + path, { method, headers: { 'Content-Type': 'application/json', ...(S.token ? { Authorization: 'Bearer ' + S.token } : {}) }, body: body ? JSON.stringify(body) : undefined });
+  let j = null; try { j = await r.json(); } catch (e) {}
+  if (r.status === 401 && !path.startsWith('/auth')) { logout(); throw new Error('Session expired, please sign in again'); }
+  if (!r.ok) throw new Error((j && j.error) || 'Request failed');
+  return j;
+}
+function toast(msg, type = '') { const t = document.createElement('div'); t.className = 'toast ' + type; t.textContent = msg; $('#toasts').append(t); setTimeout(() => t.remove(), 4200); }
+function openModal(title, html) {
+  $('#modal').innerHTML = `<div class="overlay" data-act="closeBg"><div class="modal"><header><h3>${title}</h3><button class="iconbtn right" data-act="closeModal">✕</button></header>${html}</div></div>`;
+}
+const closeModal = () => ($('#modal').innerHTML = '');
+
+/* ---------- navigation ---------- */
+const NAV = {
+  admin: [['dashboard', 'Dashboard', '📊'], ['appointments', 'Appointments', '📅'], ['doctors', 'Doctors', '🩺'], ['patients', 'Patients', '🧑'], ['beds', 'Beds & Wards', '🛏️'], ['billing', 'Billing', '🧾'], ['users', 'Users', '👥'], ['audit', 'Audit log', '🛡️']],
+  doctor: [['dashboard', 'Dashboard', '📊'], ['appointments', 'My Appointments', '📅'], ['patients', 'Patients', '🧑'], ['beds', 'Beds & Wards', '🛏️']],
+  nurse: [['dashboard', 'Dashboard', '📊'], ['appointments', 'Appointments', '📅'], ['patients', 'Patients', '🧑'], ['beds', 'Beds & Wards', '🛏️']],
+  patient: [['dashboard', 'Dashboard', '📊'], ['appointments', 'Book & Visits', '📅'], ['records', 'My Records', '📁'], ['billing', 'My Invoices', '🧾'], ['doctors', 'Doctors', '🩺']],
+};
+function renderShell() {
+  $('#auth').classList.add('hide'); $('#shell').classList.remove('hide');
+  $('#side').innerHTML = '<div class="brand"><span style="-webkit-text-fill-color:initial">🏥</span> MediSync</div>' + NAV[S.user.role].map(([id, l, i]) => `<button class="nav ${S.view === id ? 'on' : ''}" data-act="go" data-v="${id}"><span>${i}</span>${l}</button>`).join('');
+  $('#title').textContent = (NAV[S.user.role].find((n) => n[0] === S.view) || [])[1] || '';
+  $('#avatar').textContent = S.user.name.trim()[0].toUpperCase(); $('#uname').textContent = S.user.name; $('#urole').textContent = S.user.role;
+}
+async function go(v) {
+  S.view = v; renderShell(); setMain('<div class="skeleton">Loading…</div>');
+  try { await V[v](); } catch (e) { setMain(empty('⚠️ ' + esc(e.message))); }
+}
+
+/* ---------- dashboard ---------- */
+const kpi = (ico, v, l) => `<div class="kpi"><div class="ico">${ico}</div><div><b>${v}</b><span>${l}</span></div></div>`;
+const bars = (data) => { const m = Math.max(1, ...data.map((d) => d.v)); return `<div class="bars">${data.map((d) => `<div class="bar"><b>${d.v}</b><span style="height:${(d.v / m) * 100}%"></span><i>${esc(d.l)}</i></div>`).join('')}</div>`; };
+const donut = (a, b) => { const t = a + b || 1, r = 42, c = 2 * Math.PI * r, o = c * (a / t); return `<svg viewBox="0 0 100 100" class="donut"><circle cx="50" cy="50" r="${r}" fill="none" stroke="var(--border)" stroke-width="12"/><circle cx="50" cy="50" r="${r}" fill="none" stroke="var(--primary)" stroke-width="12" stroke-linecap="round" stroke-dasharray="${o} ${c - o}" transform="rotate(-90 50 50)"/><text x="50" y="56" text-anchor="middle" font-size="19" font-weight="700" fill="currentColor">${Math.round((100 * a) / t)}%</text></svg>`; };
+function apptRows(list, withActions) {
+  if (!list.length) return empty('No appointments yet');
+  const staff = S.user.role !== 'patient';
+  return `<div class="tw"><table><tr><th>When</th><th>${staff ? 'Patient' : 'Doctor'}</th><th>${staff ? 'Doctor' : 'Department'}</th><th>Reason / notes</th><th>Status</th>${withActions ? '<th></th>' : ''}</tr>` +
+    list.map((a) => { const future = new Date(a.slot) > new Date(), open = ['pending', 'confirmed'].includes(a.status);
+      let act = '';
+      if (withActions && open) {
+        if (S.user.role === 'patient' && future) act = `<button class="btn sm danger" data-act="apptStatus" data-id="${a.id}" data-s="cancelled">Cancel</button>`;
+        else if (S.user.role !== 'patient') act = `<button class="btn sm" data-act="apptDone" data-id="${a.id}">Complete</button> <button class="btn sm ghost" data-act="apptStatus" data-id="${a.id}" data-s="cancelled">Cancel</button>`;
+      }
+      return `<tr><td>${fmt(a.slot)}</td><td><b>${esc(staff ? a.patient : a.doctor)}</b></td><td>${esc(staff ? a.doctor : a.department)}</td><td>${esc(a.notes || a.reason || '—')}</td><td>${badge(a.status)}</td>${withActions ? `<td>${act}</td>` : ''}</tr>`; }).join('') + '</table></div>';
+}
+const V = {};
+V.dashboard = async function () {
+  const [s, appts] = await Promise.all([api('/stats'), api('/appointments')]);
+  const upcoming = appts.filter((a) => new Date(a.slot) >= new Date() && ['pending', 'confirmed'].includes(a.status)).reverse().slice(0, 6);
+  if (S.user.role === 'patient') {
+    return setMain(`<div class="grid g4">${kpi('📅', s.upcoming, 'Upcoming visits')}${kpi('✅', s.completed, 'Completed visits')}${kpi('📁', s.records, 'Medical records')}${kpi('🧾', s.invoices, 'Invoices')}</div>
+      <div class="card" style="margin-top:16px"><div class="row"><h3>Your upcoming appointments</h3><button class="btn right" data-act="go" data-v="appointments">＋ Book appointment</button></div>${apptRows(upcoming, false)}</div>`);
+  }
+  let extra = '';
+  if (S.user.role === 'admin') {
+    const an = (await api('/analytics')).reverse();
+    extra = `<div class="card"><h3>Nightly analytics <small class="muted">· computed by a scheduled Azure Function</small></h3>${an.length ? bars(an.map((r) => ({ l: new Date(r.day).toLocaleDateString([], { day: 'numeric', month: 'short' }), v: r.appointments }))) + '<div class="muted" style="font-size:12px">Appointments created per day</div>' : empty('The first report appears after the nightly timer runs (00:00 IST).')}</div>`;
+  }
+  setMain(`<div class="grid g4">${kpi('🧑', s.patients, 'Patients')}${kpi('🩺', s.doctors, 'Doctors')}${kpi('📅', s.today, "Today's appointments")}${kpi('⏳', s.pending, 'Awaiting confirmation')}${kpi('🛏️', s.beds_free, 'Beds free')}${S.user.role === 'admin' ? kpi('💰', money(s.revenue), 'Billed revenue') : kpi('🔴', s.beds_occupied, 'Beds occupied')}</div>
+    <div class="grid g2" style="margin-top:16px"><div class="card"><h3>Appointments · ±3 days</h3>${bars(s.trend.map((t) => ({ l: t.label, v: t.value })))}</div>
+    <div class="card"><h3>Bed occupancy</h3><div class="donutwrap">${donut(s.beds_occupied, s.beds_free)}<div><b>${s.beds_occupied}</b> occupied<br><b>${s.beds_free}</b> free</div></div></div></div>
+    ${extra}<div class="card"><h3>Upcoming appointments</h3>${apptRows(upcoming, false)}</div>`);
+};
+
+/* ---------- appointments + booking wizard ---------- */
+const dayStr = (d) => new Date(d - d.getTimezoneOffset() * 6e4).toISOString().slice(0, 10);
+const todayStr = () => dayStr(new Date());
+const defaultDate = () => { const d = new Date(); return dayStr(d.getHours() * 60 + d.getMinutes() >= 16 * 60 + 30 ? new Date(d.getTime() + 864e5) : d); };
+V.appointments = async function () {
+  const appts = await api('/appointments'); S.cache.appts = appts;
+  const f = S.filter, list = f === 'all' ? appts : appts.filter((a) => a.status === f);
+  const chips = ['all', 'pending', 'confirmed', 'completed', 'cancelled'].map((x) => `<span class="chip ${f === x ? 'on' : ''}" data-act="filter" data-f="${x}">${x[0].toUpperCase() + x.slice(1)}${x === 'all' ? ` (${appts.length})` : ''}</span>`).join('');
+  let book = '';
+  if (S.user.role === 'patient') {
+    S.cache.doctors = S.cache.doctors || await api('/doctors');
+    S.book = { date: defaultDate(), doctorId: null, slot: null };
+    book = `<div class="card"><h3>Book an appointment</h3>
+      <div class="steps"><b>1</b> Choose a doctor → <b>2</b> pick a date → <b>3</b> select a free slot → <b>4</b> confirm</div>
+      <div class="docs">${S.cache.doctors.map((d) => `<button class="doc" data-act="pickDoc" data-id="${d.id}"><div class="avatar">${esc(d.name.replace('Dr. ', '')[0])}</div><div><b>${esc(d.name)}</b><br><small>${esc(d.department)}</small></div></button>`).join('') || empty('No doctors available yet')}</div>
+      <div id="slotbox"></div></div>`;
+  }
+  setMain(`${book}<div class="card"><div class="row"><h3 style="margin:0">${S.user.role === 'patient' ? 'My appointments' : 'All appointments'}</h3><div class="chips right" style="margin:0">${chips}</div></div><div style="margin-top:10px">${apptRows(list, true)}</div></div>`);
+};
+async function renderSlots() {
+  const b = S.book; if (!b.doctorId) return;
+  const from = new Date(b.date + 'T00:00:00'), to = new Date(from.getTime() + 864e5);
+  const booked = new Set((await api(`/doctors/${b.doctorId}/booked?from=${encodeURIComponent(from.toISOString())}&to=${encodeURIComponent(to.toISOString())}`)).map((x) => new Date(x).getTime()));
+  let slots = '';
+  for (let m = 9 * 60; m < 17 * 60; m += 30) {
+    const t = new Date(from.getTime() + m * 6e4), dis = booked.has(t.getTime()) || t < new Date();
+    slots += `<button class="slot ${b.slot === t.toISOString() ? 'on' : ''}" ${dis ? 'disabled' : ''} data-act="pickSlot" data-t="${t.toISOString()}">${String(t.getHours()).padStart(2, '0')}:${String(t.getMinutes()).padStart(2, '0')}</button>`;
+  }
+  $('#slotbox').innerHTML = `<div class="row" style="margin-top:14px"><div><label>Date</label><input type="date" id="bdate" min="${todayStr()}" value="${b.date}" data-chg="date"></div><div style="flex:1;min-width:200px"><label>Reason for visit (optional)</label><input id="breason" placeholder="e.g. chest pain, follow-up"></div></div>
+    <label>Available slots (booked ones are crossed out)</label><div class="slots">${slots}</div>
+    <div class="row" style="margin-top:14px"><button class="btn" id="bookbtn" data-act="bookNow" ${b.slot ? '' : 'disabled'}>Confirm booking</button><span class="muted" id="bookhint">${b.slot ? 'Selected: ' + fmt(b.slot) : 'Select a slot to continue'}</span></div>
+    <div class="flow"><span>API</span>→<span>Queue message</span>→<span>Azure Function confirms</span>→<span>Email sent</span> <small>· status changes from pending to confirmed in a few seconds</small></div>`;
+}
+
+/* ---------- doctors, patients, records ---------- */
+V.doctors = async function () {
+  const d = await api('/doctors'); S.cache.doctors = d;
+  setMain(`${S.user.role === 'admin' ? '<div class="row" style="margin-bottom:14px"><button class="btn" data-act="addUser" data-role="doctor">＋ Add doctor</button></div>' : ''}<div class="docs">${d.map((x) => `<div class="card" style="margin:0"><div class="row"><div class="avatar" style="width:44px;height:44px">${esc(x.name.replace('Dr. ', '')[0])}</div><div><b>${esc(x.name)}</b><br><span class="muted">${esc(x.department)}</span></div></div><div class="muted" style="margin-top:10px;font-size:13px">${esc(x.email)}</div></div>`).join('') || empty('No doctors yet')}</div>`);
+};
+V.patients = async function () {
+  setMain(`<div class="card"><input id="psearch" placeholder="🔍 Search patients by name or email" data-chg="psearch"><div id="plist" style="margin-top:12px"></div></div>`); await loadPatients('');
+};
+async function loadPatients(q) {
+  const p = await api('/patients?q=' + encodeURIComponent(q)); S.cache.patients = p;
+  $('#plist').innerHTML = p.length ? `<div class="tw"><table><tr><th>Name</th><th>Email</th><th>Phone</th><th>Blood</th></tr>${p.map((x) => `<tr class="click" data-act="openPatient" data-id="${x.id}"><td><b>${esc(x.name)}</b></td><td>${esc(x.email)}</td><td>${esc(x.phone || '—')}</td><td>${esc(x.blood_group || '—')}</td></tr>`).join('')}</table></div>` : empty('No patients found');
+}
+async function openPatient(id) {
+  const p = await api('/patients/' + id);
+  openModal(esc(p.name), `<div class="muted">${esc(p.email)} · ${esc(p.phone || 'no phone')} · blood group ${esc(p.blood_group || '—')}</div>
+    <h4 style="margin:16px 0 6px">Medical records <small class="muted">(private Blob Storage)</small></h4>
+    ${p.records.length ? `<div class="tw"><table>${p.records.map((r) => `<tr><td>📄 ${esc(r.filename)}</td><td>${esc(r.kind)}</td><td>${fmt(r.created_at)}</td><td><button class="btn sm ghost" data-act="dl" data-u="/records/${r.id}/download-url">Download</button></td></tr>`).join('')}</table></div>` : '<div class="muted">No records uploaded yet</div>'}
+    <div class="row" style="margin-top:10px"><input type="file" id="upfile" style="flex:2;min-width:180px"><select id="upkind" style="flex:1;min-width:120px"><option>Lab report</option><option>Prescription</option><option>Imaging</option><option>Other</option></select><button class="btn" data-act="upload" data-id="${p.id}">Upload</button></div>
+    <h4 style="margin:16px 0 6px">Appointments</h4>${p.appointments.length ? `<div class="tw"><table>${p.appointments.slice(0, 6).map((a) => `<tr><td>${fmt(a.slot)}</td><td>${esc(a.doctor)}</td><td>${badge(a.status)}</td><td>${esc(a.notes || a.reason || '')}</td></tr>`).join('')}</table></div>` : '<div class="muted">None</div>'}`);
+}
+V.records = async function () {
+  const r = await api('/records');
+  setMain(`<div class="card"><h3>My medical records</h3>${r.length ? `<div class="tw"><table><tr><th>File</th><th>Type</th><th>Added</th><th></th></tr>${r.map((x) => `<tr><td>📄 ${esc(x.filename)}</td><td>${esc(x.kind)}</td><td>${fmt(x.created_at)}</td><td><button class="btn sm" data-act="dl" data-u="/records/${x.id}/download-url">Download</button></td></tr>`).join('')}</table></div>` : empty('No records yet. Your care team uploads reports here.')}<div class="muted" style="font-size:12px;margin-top:8px">🔒 Files are encrypted at rest and delivered through short-lived secure links.</div></div>`);
+};
+
+/* ---------- beds ---------- */
+V.beds = async function () {
+  const b = await api('/beds'); S.cache.beds = b;
+  const free = b.filter((x) => x.status === 'free').length, wards = {};
+  b.forEach((x) => (wards[x.ward] = wards[x.ward] || []).push(x));
+  const canAssign = ['nurse', 'admin'].includes(S.user.role), canDischarge = ['doctor', 'admin'].includes(S.user.role);
+  setMain(`<div class="row" style="margin-bottom:14px"><span class="badge free">${free} free</span><span class="badge occupied">${b.length - free} occupied</span><span class="muted">${b.length} beds total</span>${S.user.role === 'admin' ? '<button class="btn right" data-act="addBeds">＋ Add beds</button>' : ''}</div>` +
+    (Object.keys(wards).length ? Object.entries(wards).map(([w, list]) => `<div class="ward card"><h4>${esc(w)} <span class="muted" style="font-weight:400">· ${list.filter((x) => x.status === 'free').length}/${list.length} free</span></h4><div class="beds">${list.map((x) => `<div class="bed ${x.status}"><b>${esc(x.label)}</b><small>${x.status === 'occupied' ? esc(x.patient_name) + ' · since ' + new Date(x.admitted_at).toLocaleDateString() : 'Available'}</small>${x.status === 'free' && canAssign ? `<button class="btn sm" data-act="assign" data-id="${x.id}" data-l="${esc(x.label)}">Assign patient</button>` : ''}${x.status === 'occupied' && canDischarge ? `<button class="btn sm danger" data-act="discharge" data-id="${x.admission_id}">Discharge</button>` : ''}</div>`).join('')}</div></div>`).join('') : empty('No beds configured yet.')));
+};
+
+/* ---------- billing, users, audit ---------- */
+V.billing = async function () {
+  const inv = await api('/invoices');
+  setMain(`<div class="card"><h3>${S.user.role === 'admin' ? 'All invoices' : 'My invoices'} <small class="muted">· PDFs generated by an Azure Function on discharge</small></h3>${inv.length ? `<div class="tw"><table><tr><th>Date</th><th>Patient</th><th>Amount</th><th></th></tr>${inv.map((i) => `<tr><td>${fmt(i.created_at)}</td><td>${esc(i.patient)}</td><td><b>${money(i.amount)}</b></td><td>${i.has_file ? `<button class="btn sm" data-act="dl" data-u="/invoices/${i.id}/download-url">Download</button>` : 'Generating…'}</td></tr>`).join('')}</table></div>` : empty('No invoices yet. They appear automatically after a patient is discharged.')}</div>`);
+};
+V.users = async function () {
+  const u = await api('/users');
+  setMain(`<div class="row" style="margin-bottom:14px"><button class="btn" data-act="addUser" data-role="nurse">＋ Add staff / user</button></div><div class="card"><div class="tw"><table><tr><th>Name</th><th>Email</th><th>Role</th><th>Created</th></tr>${u.map((x) => `<tr><td><b>${esc(x.name)}</b></td><td>${esc(x.email)}</td><td><span class="badge role">${esc(x.role)}</span></td><td>${fmt(x.created_at)}</td></tr>`).join('')}</table></div></div>`);
+};
+V.audit = async function () {
+  const a = await api('/audit');
+  setMain(`<div class="card"><h3>Security audit trail <small class="muted">· also streamed to Azure Log Analytics</small></h3>${a.length ? `<div class="tw"><table><tr><th>Time</th><th>Who</th><th>Role</th><th>Action</th></tr>${a.map((x) => `<tr><td>${fmt(x.ts)}</td><td>${esc(x.actor || '—')}</td><td>${esc(x.role || '')}</td><td><span class="badge ${x.action === 'access_denied' || x.action === 'login_failed' ? 'cancelled' : 'role'}">${esc(x.action)}</span></td></tr>`).join('')}</table></div>` : empty('No events yet')}</div>`);
+};
+
+/* ---------- actions ---------- */
+const A = {
+  closeModal, closeBg: closeModal,
+  go: (d) => go(d.v),
+  theme() { const t = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'; document.documentElement.dataset.theme = t; localStorage.setItem('ms_theme', t); },
+  logout: () => logout(),
+  authTab(d) { const l = d.t === 'login'; $('#loginForm').classList.toggle('hide', !l); $('#regForm').classList.toggle('hide', l); $('#tabLogin').classList.toggle('on', l); $('#tabReg').classList.toggle('on', !l); },
+  demo(d) { $('#lemail').value = d.e; $('#lpass').value = d.p; },
+  filter(d) { S.filter = d.f; return go('appointments'); },
+  async pickDoc(d) { S.book.doctorId = d.id; S.book.slot = null; document.querySelectorAll('.doc').forEach((x) => x.classList.toggle('on', x.dataset.id === d.id)); await renderSlots(); },
+  pickSlot(d) { S.book.slot = d.t; document.querySelectorAll('.slot').forEach((x) => x.classList.toggle('on', x.dataset.t === d.t)); $('#bookbtn').disabled = false; $('#bookhint').textContent = 'Selected: ' + fmt(d.t); },
+  async bookNow() {
+    const btn = $('#bookbtn'); btn.disabled = true;
+    try { await api('/appointments', { method: 'POST', body: { doctorId: S.book.doctorId, slot: S.book.slot, reason: $('#breason').value } }); toast('Booked! An Azure Function will confirm it and email you shortly.', 'ok'); await go('appointments'); setTimeout(refresh, 4000); setTimeout(refresh, 10000); }
+    catch (e) { toast(e.message, 'err'); btn.disabled = false; await renderSlots(); }
+  },
+  async apptStatus(d) { if (!confirm('Change status to ' + d.s + '?')) return; await api('/appointments/' + d.id, { method: 'PATCH', body: { status: d.s } }); toast('Appointment ' + d.s, 'ok'); go('appointments'); },
+  apptDone(d) { openModal('Complete appointment', `<label>Visit notes</label><textarea id="anotes" rows="4" placeholder="Diagnosis, advice, follow-up…"></textarea><div class="row" style="margin-top:12px"><button class="btn" data-act="apptDoneSave" data-id="${d.id}">Mark completed</button></div>`); },
+  async apptDoneSave(d) { await api('/appointments/' + d.id, { method: 'PATCH', body: { status: 'completed', notes: $('#anotes').value } }); closeModal(); toast('Marked completed', 'ok'); go('appointments'); },
+  openPatient: (d) => openPatient(d.id),
+  async upload(d) {
+    const f = $('#upfile').files[0]; if (!f) return toast('Choose a file first', 'err');
+    const r = await api(`/patients/${d.id}/records/upload-url`, { method: 'POST', body: { filename: f.name, kind: $('#upkind').value } });
+    const res = await fetch(r.url, { method: 'PUT', headers: { ...r.headers, 'Content-Type': f.type || 'application/octet-stream' }, body: f });
+    if (!res.ok) throw new Error('Upload failed (' + res.status + ')');
+    toast('Uploaded securely', 'ok'); openPatient(d.id);
+  },
+  async dl(d) { const r = await api(d.u); window.open(r.url, '_blank'); },
+  async assign(d) {
+    const p = await api('/patients?q=');
+    openModal('Assign bed ' + esc(d.l), `<label>Patient</label><select id="apat">${p.map((x) => `<option value="${x.id}">${esc(x.name)} (${esc(x.email)})</option>`).join('')}</select><div class="row" style="margin-top:14px"><button class="btn" data-act="assignSave" data-id="${d.id}">Admit patient</button></div>`);
+  },
+  async assignSave(d) { try { await api(`/beds/${d.id}/assign`, { method: 'POST', body: { patientId: $('#apat').value } }); closeModal(); toast('Patient admitted', 'ok'); } catch (e) { closeModal(); toast(e.message, 'err'); } go('beds'); },
+  async discharge(d) { if (!confirm('Discharge this patient and generate the invoice?')) return; await api(`/admissions/${d.id}/discharge`, { method: 'POST' }); toast('Discharged. The invoice is being generated by an Azure Function.', 'ok'); go('beds'); },
+  addBeds() { openModal('Add beds', `<label>Ward name</label><input id="bward" placeholder="e.g. ICU, General, Pediatrics"><label>How many beds?</label><input id="bcount" type="number" min="1" max="20" value="4"><div class="row" style="margin-top:14px"><button class="btn" data-act="addBedsSave">Add</button></div>`); },
+  async addBedsSave() { await api('/beds', { method: 'POST', body: { ward: $('#bward').value, count: $('#bcount').value } }); closeModal(); toast('Beds added', 'ok'); go('beds'); },
+  addUser(d) { openModal(d.role === 'doctor' ? 'Add doctor' : 'Add user', `<label>Full name</label><input id="uname2"><label>Email</label><input id="uemail" type="email"><label>Temporary password (min 8)</label><input id="upass" type="text" value="Welcome@123"><label>Role</label><select id="urole2">${['doctor', 'nurse', 'admin', 'patient'].map((r) => `<option ${r === d.role ? 'selected' : ''}>${r}</option>`).join('')}</select><label>Department (doctors)</label><input id="udept" placeholder="Cardiology"><div class="row" style="margin-top:14px"><button class="btn" data-act="addUserSave">Create account</button></div>`); },
+  async addUserSave() { await api('/users', { method: 'POST', body: { name: $('#uname2').value, email: $('#uemail').value, password: $('#upass').value, role: $('#urole2').value, department: $('#udept').value } }); closeModal(); toast('Account created', 'ok'); S.cache.doctors = null; go(S.view); },
+  async profile() {
+    const me = await api('/me'), p = me.patient;
+    openModal('My profile', `<div class="row"><div class="avatar" style="width:52px;height:52px;font-size:20px">${esc(me.name[0])}</div><div><b>${esc(me.name)}</b><br><span class="muted">${esc(me.email)}</span> <span class="badge role">${esc(me.role)}</span></div></div>
+      ${p ? `<label>Phone</label><input id="pphone" value="${esc(p.phone || '')}"><label>Blood group</label><input id="pblood" value="${esc(p.blood_group || '')}" placeholder="O+"><div class="row" style="margin-top:14px"><button class="btn" data-act="profileSave">Save</button></div>` : ''}`);
+  },
+  async profileSave() { await api('/me', { method: 'PATCH', body: { phone: $('#pphone').value, bloodGroup: $('#pblood').value } }); closeModal(); toast('Profile saved', 'ok'); },
+};
+document.addEventListener('click', async (e) => {
+  const el = e.target.closest('[data-act]'); if (!el || !A[el.dataset.act]) return;
+  if (el.dataset.act === 'closeBg' && e.target !== el) return;
+  try { await A[el.dataset.act](el.dataset, el); } catch (err) { toast(err.message, 'err'); }
+});
+let st; document.addEventListener('input', (e) => { if (e.target.dataset.chg === 'psearch') { clearTimeout(st); st = setTimeout(() => loadPatients(e.target.value).catch((x) => toast(x.message, 'err')), 250); } });
+document.addEventListener('change', async (e) => { if (e.target.dataset.chg === 'date') { S.book.date = e.target.value; S.book.slot = null; await renderSlots(); } });
+
+/* ---------- auth ---------- */
+document.addEventListener('submit', async (e) => {
+  e.preventDefault(); const f = e.target.dataset.form;
+  try {
+    const r = f === 'login' ? await api('/auth/login', { method: 'POST', body: { email: $('#lemail').value, password: $('#lpass').value } })
+      : await api('/auth/register', { method: 'POST', body: { name: $('#rname').value, email: $('#remail').value, phone: $('#rphone').value, password: $('#rpass').value } });
+    S.token = r.token; localStorage.setItem('ms_token', r.token); S.user = r.user; S.view = 'dashboard'; renderShell(); go('dashboard');
+  } catch (err) { toast(err.message, 'err'); }
+});
+function logout() { localStorage.removeItem('ms_token'); S.token = null; S.user = null; S.cache = {}; closeModal(); $('#shell').classList.add('hide'); $('#auth').classList.remove('hide'); }
+function refresh() { if (S.user && !$('#modal').innerHTML && ['dashboard', 'appointments', 'billing', 'beds'].includes(S.view) && !(S.view === 'appointments' && S.user.role === 'patient' && S.book.slot)) go(S.view); }
+
+(async function boot() {
+  document.documentElement.dataset.theme = localStorage.getItem('ms_theme') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+  try { S.cfg = await (await fetch('/config.json')).json(); } catch (e) {}
+  if (S.cfg.demo) {
+    const accts = [['Doctor', 'dr.rao@medisync.local', 'Doctor@123'], ['Nurse', 'nurse@medisync.local', 'Nurse@123'], ['Patient', 'patient@medisync.local', 'Patient@123']];
+    if (S.cfg.adminHint) accts.unshift(['Admin', 'admin@medisync.local', 'Admin@12345']);
+    $('#demo').classList.remove('hide'); $('#demochips').innerHTML = accts.map(([l, e, p]) => `<span class="chip" data-act="demo" data-e="${e}" data-p="${p}">${l}</span>`).join('');
+  }
+  if (S.token) { try { S.user = await api('/me'); renderShell(); return go('dashboard'); } catch (e) {} }
+  $('#auth').classList.remove('hide');
+  setInterval(refresh, 20000);
+})();
+</script>
+</body>
+</html>

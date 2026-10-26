@@ -1,0 +1,18 @@
+{
+  "name": "medisync-api",
+  "version": "2.0.0",
+  "description": "MediSync API tier (Docker image on Azure Container Apps)",
+  "main": "src/server.js",
+  "scripts": { "start": "node src/server.js", "test": "jest --runInBand" },
+  "engines": { "node": ">=20" },
+  "dependencies": {
+    "@azure/identity": "^4.4.1",
+    "@azure/storage-blob": "^12.24.0",
+    "@azure/storage-queue": "^12.23.0",
+    "bcryptjs": "^2.4.3",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2",
+    "pg": "^8.12.0"
+  },
+  "devDependencies": { "jest": "^29.7.0", "supertest": "^7.0.0" }
+}
