@@ -1,0 +1,89 @@
+name: ci-cd
+on:
+  push: { branches: [main] }
+  pull_request: { branches: [main] }
+  workflow_dispatch:
+
+permissions:
+  id-token: write   # OIDC login to Azure (no stored passwords)
+  contents: read
+
+env:
+  ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+  TF_VAR_subscription_id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+  TF_VAR_alert_email: ${{ secrets.ALERT_EMAIL }}
+  TF_VAR_admin_password: ${{ secrets.ADMIN_PASSWORD }}
+  TF_VAR_notification_emails: ${{ secrets.NOTIFY_EMAILS_JSON || '[]' }}
+
+jobs:
+  test:                       # Stage 1: continuous integration
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - name: Unit tests (API)
+        working-directory: app
+        run: npm install && npm test
+      - name: Install Functions dependencies
+        working-directory: functions
+        run: npm install --omit=dev
+      - uses: hashicorp/setup-terraform@v3
+      - name: Terraform format + validate
+        working-directory: infra
+        run: |
+          terraform fmt -check -recursive || echo "::warning::run terraform fmt -recursive"
+          terraform init -backend=false
+          terraform validate
+      - name: Build Docker image (smoke build)
+        run: docker build -t medisync-api:ci app
+
+  deploy:                     # Stage 2: continuous delivery (main branch only)
+    needs: test
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - uses: hashicorp/setup-terraform@v3
+        with: { terraform_wrapper: false }
+
+      - name: Terraform init + create container registry first
+        working-directory: infra
+        run: |
+          terraform init -backend-config="resource_group_name=${{ secrets.TF_STATE_RG }}" \
+            -backend-config="storage_account_name=${{ secrets.TF_STATE_SA }}" \
+            -backend-config="container_name=tfstate" -backend-config="key=medisync.tfstate"
+          terraform apply -auto-approve -target=azurerm_container_registry.main
+
+      - name: Build and push Docker image to Azure Container Registry
+        run: |
+          ACR=$(az acr list -g rg-medisync-dev --query "[0].name" -o tsv)
+          az acr login --name $ACR
+          docker build -t $ACR.azurecr.io/medisync-api:${{ github.sha }} app
+          docker push $ACR.azurecr.io/medisync-api:${{ github.sha }}
+
+      - name: Terraform apply - full infrastructure + new image (Infrastructure as Code)
+        working-directory: infra
+        run: |
+          terraform apply -auto-approve -var deploy_app=true -var image_tag=${{ github.sha }}
+          echo "APP_URL=$(terraform output -raw app_url)" >> $GITHUB_ENV
+          echo "FUNC=$(terraform output -raw function_app_name)" >> $GITHUB_ENV
+          echo "RG=$(terraform output -raw resource_group)" >> $GITHUB_ENV
+
+      - name: Deploy Azure Functions code
+        run: |
+          cd functions && npm install --omit=dev && zip -qr ../functions.zip . && cd ..
+          az functionapp deploy -g $RG -n $FUNC --src-path functions.zip --type zip
+
+      - name: Smoke test
+        run: |
+          echo "::notice title=MediSync URL::$APP_URL"
+          for i in $(seq 1 18); do curl -fs $APP_URL/health && echo " <- healthy" && exit 0; sleep 10; done
+          echo "health check failed"; exit 1
