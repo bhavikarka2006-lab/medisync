@@ -77,10 +77,17 @@ jobs:
           echo "FUNC=$(terraform output -raw function_app_name)" >> $GITHUB_ENV
           echo "RG=$(terraform output -raw resource_group)" >> $GITHUB_ENV
 
+      
       - name: Deploy Azure Functions code
         run: |
-          cd functions && npm install --omit=dev && zip -qr ../functions.zip . && cd ..
-          az functionapp deploy -g $RG -n $FUNC --src-path functions.zip --type zip
+          cd functions
+          npm install --omit=dev
+          zip -qr ../functions.zip .
+          cd ..
+          az functionapp deployment source config-zip \
+            --resource-group "$RG" \
+            --name "$FUNC" \
+            --src functions.zip
 
       - name: Smoke test
         run: |
