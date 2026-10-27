@@ -27,23 +27,19 @@ resource "azurerm_container_app" "api" {
     server   = azurerm_container_registry.main.login_server
     identity = azurerm_user_assigned_identity.app.id
   }
-  # Secrets are pulled from Key Vault by the managed identity (never stored in Terraform vars or the image)
+ # Express environments do not support Key Vault references, so secrets are passed as Container App secrets
   secret {
-    name                = "db-password"
-    identity            = azurerm_user_assigned_identity.app.id
-    key_vault_secret_id = azurerm_key_vault_secret.db.versionless_id
+    name  = "db-password"
+    value = random_password.db.result
   }
   secret {
-    name                = "jwt-secret"
-    identity            = azurerm_user_assigned_identity.app.id
-    key_vault_secret_id = azurerm_key_vault_secret.jwt.versionless_id
+    name  = "jwt-secret"
+    value = random_password.jwt.result
   }
   secret {
-    name                = "admin-password"
-    identity            = azurerm_user_assigned_identity.app.id
-    key_vault_secret_id = azurerm_key_vault_secret.admin.versionless_id
+    name  = "admin-password"
+    value = var.admin_password
   }
-
   ingress {
     external_enabled = true
     target_port      = 3000
